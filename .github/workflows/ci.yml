@@ -1,0 +1,35 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Flake check
+        run: nix flake check -L
+
+      - name: Build winegui
+        run: nix build .#winegui -L --out-link result-lean
+
+      - name: Build winegui-fhs
+        run: nix build .#winegui-fhs -L --out-link result-fhs
+
+      - name: Packaging assertions
+        run: |
+          set -euo pipefail
+          grep '^Exec=' result-lean/share/applications/winegui.desktop
+          # the glib setup hook relocates the schema tree, so search for it
+          find result-lean/share -name gschemas.compiled | grep -q gschemas.compiled
+          test -f result-lean/share/metainfo/org.melroy.winegui.metainfo.xml
+          test -x result-lean/bin/winegui
+          test -x result-fhs/bin/winegui-fhs
+          grep '^Exec=winegui-fhs' result-fhs/share/applications/winegui.desktop
