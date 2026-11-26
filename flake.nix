@@ -14,9 +14,10 @@
       packages = forAllSystems (
         pkgs:
         let
-          # `wine = null` is explicit: callPackage would otherwise auto-fill pkgs.wine.
-          # Use `.override { wine = pkgs.wine; }` to bundle a pinned Wine instead.
-          winegui = pkgs.callPackage ./package.nix { wine = null; };
+          # `winePkg` is not a nixpkgs attribute, so callPackage leaves its `null`
+          # default alone and no Wine is bundled. Use
+          # `.override { winePkg = pkgs.wine; }` to bundle a pinned Wine instead.
+          winegui = pkgs.callPackage ./package.nix { };
         in
         {
           inherit winegui;

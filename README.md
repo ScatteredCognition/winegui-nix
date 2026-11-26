@@ -42,11 +42,14 @@ If no Wine is found, WineGUI reports *"Could not find wine binary. Please instal
 machine and try again."* WineGUI requires Wine 9 or newer.
 
 To pin a specific Wine into the wrapper anyway (at the cost of ~1.5 GiB of closure and
-shadowing the user's Wine):
+shadowing the user's Wine), pass `winePkg`:
 
 ```nix
-winegui-nix.packages.x86_64-linux.winegui.override { wine = pkgs.wineWow64Packages.staging; }
+winegui-nix.packages.x86_64-linux.winegui.override { winePkg = pkgs.wineWow64Packages.staging; }
 ```
+
+The argument is called `winePkg` rather than `wine` on purpose: `callPackage` auto-fills any
+argument whose name exists in `pkgs`, so a `wine` argument would be silently bundled again.
 
 ## Winetricks
 
@@ -172,8 +175,8 @@ The `update` workflow does this weekly and opens a PR.
 - keep `CUSTOM_PROJECT_VERSION`, `CHECK_FOR_UPDATE=false`, `GSETTINGS_COMPILE=false`;
 - `passthru.updateScript = nix-update-script { }` (no arguments inside nixpkgs);
 - set `meta.maintainers` to your nixpkgs handle;
-- nixpkgs convention would auto-fill `wine` via `callPackage`. Either accept a bundled Wine
-  there (`wine` default from pkgs, like `bottles` does) or keep `wine = null` and say why in
-  the commit message — reviewers will ask either way;
+- `winePkg` stays `null` here; nixpkgs reviewers may prefer a bundled Wine (`wine` default
+  from pkgs, like `bottles` does). If you rename it to `wine` for nixpkgs, note that
+  `callPackage` will then auto-fill it — say which behaviour you want in the PR description;
 - if a newer compiler trips upstream's hard-coded `-Werror`, prefer patching the offending
   warnings rather than adding `-Wno-error`.
