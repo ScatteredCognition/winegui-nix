@@ -13,7 +13,7 @@
   # Wine is deliberately not bundled by default: WineGUI resolves "wine" from PATH and
   # is designed to use the system Wine, so users can point it at nix-gaming, a custom
   # build, or a per-bottle runner. Pass `wine = pkgs.wine` to pin one.
-  winePkg ? null,
+  wine ? null,
   # Runtime tools WineGUI shells out to for downloads, runner handling and Winetricks.
   wget,
   cabextract,
@@ -98,7 +98,7 @@ stdenv.mkDerivation (finalAttrs: {
     gappsWrapperArgs+=(
       --prefix PATH : "${
         lib.makeBinPath (
-          lib.optionals (winePkg != null) [ winePkg ]
+          lib.optionals (wine != null) [ wine ]
           ++ [
             wget
             cabextract
